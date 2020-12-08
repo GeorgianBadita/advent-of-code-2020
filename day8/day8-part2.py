@@ -44,21 +44,6 @@ def make_jmp_nop(instructions: List[str]) -> Optional[int]:
             return acc_val
 
 
-def make_nop_jump(instructions: List[str]) -> Optional[int]:
-    positive_nops = [
-        instruction
-        for instruction in instructions
-        if instruction.split(" ")[1] == "nop"
-    ]
-    for nop in positive_nops:
-        local_instructions = instructions[:]
-        index, _, param = nop.split(" ")
-        local_instructions[int(index)] = " ".join([index, "jmp", param])
-        acc_val = compute_sum(local_instructions)
-        if acc_val:
-            return acc_val
-
-
 in_file = "day8/in-day-8.txt"
 
 instructions = read_input(in_file)
@@ -66,7 +51,3 @@ instructions = read_input(in_file)
 change_jmp = make_jmp_nop(instructions)
 if change_jmp:
     print(change_jmp)
-
-change_nop = make_nop_jump(instructions)
-if change_nop:
-    print(change_nop)
