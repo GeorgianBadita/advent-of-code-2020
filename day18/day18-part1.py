@@ -7,60 +7,66 @@ def read_input(in_file: str) -> List[str]:
 
 
 def get_number(pos: int, expression: str) -> Tuple[float, int]:
+
+    if not (ord("0") <= ord(expression[pos]) <= ord("9")):
+        return float("-inf"), pos
+
     num = 0
     while pos < len(expression) and ord("0") <= ord(expression[pos]) <= ord("9"):
         num = num * 10 + int(expression[pos])
         pos += 1
 
-    return num if num > 0 else float("-inf"), pos
+    return num, pos
+
+
+def get_closing_par_pos(stack: list) -> int:
+    pos = len(stack) - 1
+    count = 1
+    while pos >= 0:
+        if stack[pos] == "(":
+            count += 1
+        elif stack[pos] == ")":
+            count -= 1
+        if count == 0:
+            break
+        pos -= 1
+
+    return pos
 
 
 def compute_expression(expression: str) -> int:
-    stack = []
     pos = 0
+    stack = []
     while pos < len(expression):
-        num, new_pos = get_number(pos, expression)
-
-        if new_pos >= len(expression):
-            break
-
-        if expression[new_pos] == ")":
+        num, next_pos = get_number(pos, expression)
+        if num != float("-inf"):
             stack.append(num)
-            while new_pos < len(expression) and expression[new_pos] == ")":
-                new_pos += 1
-            pos = new_pos + 1
-            continue
-
-        if expression[new_pos] == "(":
-            while new_pos < len(expression) and expression[new_pos] == "(":
-                new_pos += 1
-            if expression[new_pos - 2] == ")":
-                stack.append(expression[new_pos - 1])
-
-            num, new_pos = get_number(new_pos, expression)
-            stack.append(num)
-            stack.append(expression[new_pos])
-            pos = new_pos + 1
-            continue
-
-        if not stack:
-            stack.append(num)
-            stack.append(expression[new_pos])
-            pos = new_pos + 1
-            continue
-
-        op = stack.pop()
+        if next_pos < len(expression):
+            stack.append(expression[next_pos])
+        pos = next_pos + 1
+    stack.reverse()
+    while len(stack) != 1:
         op1 = stack.pop()
-        stack.append(op1 * num if op == "*" else op1 + num)
-        stack.append(expression[new_pos])
-        pos = new_pos + 1
-    print(stack)
-    return stack
+        if op1 == "(":
+            ending_par_pos = get_closing_par_pos(stack)
+            stack = stack[:ending_par_pos] + stack[ending_par_pos + 1 :]
+            continue
+        op = stack.pop()
+        op2 = stack.pop()
+        if op2 == "(":
+            ending_par_pos = get_closing_par_pos(stack)
+            stack = stack[:ending_par_pos] + [op1, op] + stack[ending_par_pos + 1 :]
+        else:
+            if op == "+":
+                stack.append(op1 + op2)
+            else:
+                stack.append(op1 * op2)
+
+    return stack[-1]
 
 
 in_file = "day18/in-day-18.txt"
 
 expressions = read_input(in_file)
-sums = [compute_expression(expr) for expr in expressions]
-# print(sums)
-# print(sum(sums))
+res = [compute_expression(expr) for expr in expressions]
+print(sum(res))
