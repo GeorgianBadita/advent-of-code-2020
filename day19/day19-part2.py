@@ -15,7 +15,10 @@ def read_input(in_file: str):
             elif ":" in line:
                 index, rule = line.split(":")
                 current_rules = rule.split("|")
-                rules[index] = [[x.strip() for x in current_rule.strip().split(" ")] for current_rule in current_rules]
+                if index != "8" and index != "11":
+                    rules[index] = [
+                        [x.strip() for x in current_rule.strip().split(" ")] for current_rule in current_rules
+                    ]
             else:
                 if line != "\n":
                     strings.append(line.strip())
@@ -27,8 +30,6 @@ sols = set()
 
 
 def generate_all_matching(rules: dict, terminals: list, sol: list):
-    global cnt_11_rule
-    global cnt_8_rule
     is_final = True
     pos = 0
     while pos < len(sol):
@@ -41,7 +42,6 @@ def generate_all_matching(rules: dict, terminals: list, sol: list):
         return
 
     for rule in rules[sol[pos]]:
-
         last_sol = sol
         if rule not in terminals:
             sol = sol[:pos] + rule + sol[pos + 1 :]
@@ -55,6 +55,10 @@ def generate_all_matching(rules: dict, terminals: list, sol: list):
 in_file = "day19/in-day-19.txt"
 
 rules, strings, terminal_set = read_input(in_file)
-generate_all_matching(rules, terminal_set, ["0"])
+generate_all_matching(rules, terminal_set, ["42"])
+sols_42 = sols.copy()
+sols = set()
+generate_all_matching(rules, terminal_set, ["31"])
+sols_31 = sols.copy()
 
 print(sum([1 if string in sols else 0 for string in strings]))
